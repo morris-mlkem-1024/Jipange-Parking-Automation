@@ -8,32 +8,24 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-/**
- * ARCHITECTURAL LAYER: Core Business Logic / Engine Layer
- * PURPOSE: Manages in-memory data structures, calculates tiered parking tariffs,
- * and maintains atomic data consistency between local collections and the SQL transaction schemas.
- */
+// Core class to manage parking slots and handle vehicle check-in/check-out
 public class ParkingManagement {
     
-    // Dynamic array matrix to store the collection of physical parking spots
+    // Lists to hold all 100 parking spots
     private ArrayList<Slot> layout = new ArrayList<>();
     
-    // High-performance associative map to track active cars using license plates as keys
+    // Map to keep track of active vehicles currently inside the facility
     private HashMap<String, Vehicle> activeVehicle = new HashMap<>();
 
-    /**
-     * Constructor that configures the parking bays layout matrix and initializes the
-     * AUTOMATED DATA RECOVERY BOOT LOADER. On system launch, it queries XAMPP MySQL to pull 
-     * all open sessions and instantly restores them into the active running memory state.
-     */
+    // Constructor to initialize slots and automatically load cars from the cloud database on startup
     public ParkingManagement(int totalSlots) {
-        // STEP 1: Initialize the default vacant layout maps configurations structures array lists
+        // Initialize the default layout structure
         for (int i = 1; i <= totalSlots; i++) {
             layout.add(new Slot(i, "A" + i));
         }
 
-        // STEP 2: RUN HISTORICAL RECOVERY PIPELINE TO REHYDRATE ACTIVE CACHES
-        System.out.println("🔄 [BOOT LAYER] Initializing System Persistence Recovery Pipeline...");
+        // Auto-load uncleared vehicles from the database to keep data consistent
+        System.out.println("Loading active vehicle records from cloud database...");
         String recoverySQL = "SELECT slot_id, license_plate, entry_time FROM vehicle_logs WHERE exit_time IS NULL";
 
         try (Connection conn = Database.getConnection()) {
@@ -48,39 +40,32 @@ public class ParkingManagement {
                         String licensePlate = rs.getString("license_plate");
                         java.sql.Timestamp entryTimestamp = rs.getTimestamp("entry_time");
                         
-                        // Bounds constraint check: map parameters back into our 100 spots index cleanly
+                        // Safety check to ensure records fit within our 100 slots range
                         if (slotId >= 1 && slotId <= layout.size()) {
                             Slot slot = layout.get(slotId - 1);
-                            slot.setStatus("OCCUPIED"); // Lock grid monitor cell indicators properties
+                            slot.setStatus("OCCUPIED"); 
                             
-                            // Transform java.sql.Timestamp cleanly back into native LocalDateTime streams
                             LocalDateTime originalEntryTime = entryTimestamp.toLocalDateTime();
-                            
-                            // Invoke our new constructor overload to retain exact billing clock parameters
                             Vehicle vehicle = new Vehicle(licensePlate, slot.getSlotNumber(), originalEntryTime);
                             
-                            // Inject items references straight back down into our associative data map layout array
                             activeVehicle.put(licensePlate, vehicle);
                             recoveredCount++;
                         }
                     }
-                    System.out.println("✅ [BOOT LAYER] Data recovery loop complete. Successfully restored " + recoveredCount + " active parking slots.");
+                    System.out.println("Data recovery complete. Restored " + recoveredCount + " active slots.");
                 }
             }
         } catch (SQLException e) {
-            System.err.println("❌ [BOOT LAYER] Critical warning: Recovery stream encountered database mapping exceptions.");
+            System.err.println("Warning: Data recovery loop encountered an exception.");
             e.printStackTrace();
         }
     }
 
-
-    /**
-     * ALGORITHM IMPLEMENTATION: Computes the precise parking fee in Kenya Shillings based on time spent.
-     */
+    // Calculates the parking fees based on total duration spent inside
     public double fee(String licensePlate) {
         Vehicle vehicle = activeVehicle.get(licensePlate);
         if (vehicle == null) {       
-            System.err.println("⚠️ Warning: Request received for a vehicle not stored in memory.");
+            System.err.println("Warning: Request received for a vehicle not in memory.");
             return 0.0;
         }
 
@@ -88,7 +73,7 @@ public class ParkingManagement {
         long totalDuration = ChronoUnit.MINUTES.between(vehicle.getentryTime(), exitTime);
         double amountPayable = 0.0;
 
-        // Pricing logic matrices
+        // Simple tiered pricing logic
         if (totalDuration <= 30) {    
             amountPayable = 0.0;
         } else if (totalDuration <= 120) {
@@ -103,12 +88,10 @@ public class ParkingManagement {
         return amountPayable;
     }
 
-    /**
-     * MODULE 2 ALGORITHM: Handles incoming vehicles, assigns empty space, and saves records to the database.
-     */
+    // Handles incoming vehicles, assigns an empty space, and saves logs to the database
     public String checkIn(String licensePlate) {
         if (activeVehicle.containsKey(licensePlate)) {
-            return "ERROR: A vehicle with license plate " + licensePlate + " is already clocked into the system.";
+            return "ERROR: A vehicle with license plate " + licensePlate + " is already checked in.";
         }
 
         Slot slotAssigned = null;
@@ -120,7 +103,7 @@ public class ParkingManagement {
         }
         
         if (slotAssigned == null) {
-            return "REGRET: The parking facility is currently at maximum capacity.";
+            return "REGRET: The parking facility is currently full.";
         }
 
         slotAssigned.setStatus("OCCUPIED");
@@ -151,7 +134,7 @@ public class ParkingManagement {
                 conn.commit();
             }
         } catch (SQLException e) {
-            System.err.println("❌ Database rollback executed during check-in failure.");
+            System.err.println("Database rollback executed during check-in failure.");
             e.printStackTrace();
             return "SYSTEM WARNING: Vehicle tracked in cache but failed database sync.";
         }
@@ -159,24 +142,22 @@ public class ParkingManagement {
         return "Welcome! Vehicle " + licensePlate + " successfully assigned to slot: " + slotAssigned.getSlotNumber(); 
     }
 
-    /**
-     * MODULE 3 & 4 ALGORITHM: Runs exit processing pipelines, looks up fees, and handles checkout processes.
-     */
+    // Processes exits, checks fees, simulates M-Pesa push, and updates database records
     public String checkOut(String licensePlate) {
         Vehicle vehicle = activeVehicle.get(licensePlate);
         if (vehicle == null) {
-            return "ERROR: License plate " + licensePlate + " is not registered inside our active tracking tables.";
+            return "ERROR: License plate " + licensePlate + " is not registered in active tracking tables.";
         }
         
         double finalAmount = fee(licensePlate);
 
-        System.out.println("💳 [M-PESA DARAJA ENGINE] Dispatched STK Push alert prompt query.");
-        System.out.println("📱 [STK API STATUS] Requesting KES " + finalAmount + " from customer phone stream...");
+        System.out.println("Simulating M-Pesa STK Push authorization...");
+        System.out.println("Requesting KES " + finalAmount + " from customer mobile device...");
         
         boolean paymentAuthorizedSuccessfully = true; 
 
         if (!paymentAuthorizedSuccessfully) {
-            return "ERROR: STK Push declined or transaction timed out on Safaricom checkout channel lines.";
+            return "ERROR: STK Push declined or transaction timed out.";
         }
 
         Slot slotAssigned = null;
@@ -203,6 +184,7 @@ public class ParkingManagement {
                     logStmt.setTimestamp(1, java.sql.Timestamp.valueOf(LocalDateTime.now()));
                     logStmt.setDouble(2, finalAmount);
                     logStmt.setString(3, licensePlate);
+                    logStmt.setTimestamp(1, java.sql.Timestamp.valueOf(LocalDateTime.now()));
                     logStmt.executeUpdate();
                 }
                 
@@ -214,17 +196,15 @@ public class ParkingManagement {
                 conn.commit();
             }
         } catch (SQLException e) {
-            System.err.println("❌ Database sync breakdown encountered during exit tracking steps.");
+            System.err.println("Database sync error encountered during exit operations.");
             e.printStackTrace();
-            return "CHECKOUT FAILED: Database engine structural synchronization mismatch error.";
+            return "CHECKOUT FAILED: Database log synchronization error.";
         }
         
         return "M-Pesa Payment of KES " + finalAmount + " Confirmed! \nBarrier Opening Automatically. Drive Safely!";
     }
 
-    /**
-     * Exposes the complete internal array layout to the layout viewing adapters.
-     */
+    // Returns the collection of spaces
     public ArrayList<Slot> getLayout() {
         return layout;
     }
