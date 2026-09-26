@@ -1,0 +1,218 @@
+/* Custom Premium Dark-Mode Glassmorphism Design Stylesheet */
+body {
+    background-color: #0f172a;
+    color: #f1f5f9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+header {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border-b: 1px solid #1e293b;
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #38bdf8;
+    letter-spacing: -0.025em;
+}
+
+.counter-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#available-counter {
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 6px 16px;
+    border-radius: 9999px;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+main {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+}
+
+@media (min-width: 1024px) {
+    main {
+        grid-template-columns: 1fr 2fr;
+    }
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.card {
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 24px;
+}
+
+h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.entry-title { color: #34d399; }
+.exit-title { color: #22d3ee; }
+.grid-title { color: #cbd5e1; margin-top: 0; margin-bottom: 24px;}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+}
+
+input {
+    width: 100%;
+    background: #020617;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 12px;
+    color: #fff;
+    font-family: monospace;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+input:focus {
+    outline: none;
+}
+
+#entry-plate:focus { border-color: #10b981; }
+#exit-plate:focus { border-color: #06b6d4; }
+#mpesa-phone:focus { border-color: #f59e0b; }
+
+button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+button:active { transform: scale(0.98); }
+
+.btn-entry { background: #10b981; color: #020617; }
+.btn-entry:hover { background: #059669; }
+
+.btn-exit { background: linear-gradient(to right, #06b6d4, #14b8a6); color: #020617; }
+.btn-exit:hover { filter: brightness(1.1); }
+
+.grid-container {
+    background: rgba(30, 41, 59, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    padding: 24px;
+}
+
+.parking-matrix {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+}
+
+.slot-card {
+    padding: 16px 8px;
+    border-radius: 10px;
+    border: 1px solid;
+    font-family: monospace;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.slot-card:hover { transform: scale(1.05); }
+
+.slot-vacant {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.25);
+    color: #34d399;
+}
+
+.slot-occupied {
+    background: rgba(244, 63, 94, 0.08);
+    border-color: rgba(244, 63, 94, 0.25);
+    color: #f43f5e;
+}
+
+.slot-number { font-size: 0.85rem; font-weight: bold; color: #94a3b8; margin-bottom: 4px; }
+.slot-status { font-size: 0.65rem; font-weight: 900; letter-spacing: 0.05em; }
+
+/* Dynamic Floating Toast Component Layout */
+#toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #020617;
+    border: 1px solid #1e293b;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 400px;
+    z-index: 1000;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: translateY(150px);
+    opacity: 0;
+}
+
+#toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot-error { background: #f43f5e; box-shadow: 0 0 8px #f43f5e; }
+.dot-success { background: #10b981; box-shadow: 0 0 8px #10b981; }
+#toast-message { margin: 0; font-size: 0.9rem; font-weight: 500; }

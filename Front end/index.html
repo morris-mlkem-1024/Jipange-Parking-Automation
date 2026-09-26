@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jipange Parking - Smart Dashboard</title>
+    <!-- LINK TO YOUR OFFLINE CSS FILE -->
+    <link rel="icon" type="image/jpg" href="favicon.jpg">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Section Monitoring Bar -->
+    <header>
+        <div class="header-container">
+            <h1>🅿️ Jipange Parking Automation</h1>
+            <div class="counter-wrapper">
+                <span style="font-size: 0.9rem; color: #94a3b8;">Available Slots:</span>
+                <span id="available-counter">--</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Dashboard Grid -->
+    <main>
+        
+        <!-- Left Side: Gate Controls -->
+        <div class="sidebar">
+            
+            <!-- Entry Card Panel -->
+            <div class="card">
+                <h2 class="entry-title">🚗 Entry Barrier Check-In</h2>
+                <div class="form-group">
+                    <label>License Plate Number</label>
+                    <input type="text" id="entry-plate" placeholder="e.g. KAA 123A">
+                </div>
+                <button onclick="processCheckIn()" class="btn-entry">Trigger Entry Barrier</button>
+            </div>
+
+            <!-- Exit Card Panel -->
+            <div class="card">
+                <h2 class="exit-title">🚙 Exit Barrier Check-Out</h2>
+                <div class="form-group">
+                    <label>License Plate Number</label>
+                    <input type="text" id="exit-plate" placeholder="e.g. KAA 123A">
+                </div>
+                <div class="form-group">
+                    <label>M-Pesa Mobile Number</label>
+                    <input type="text" id="mpesa-phone" placeholder="e.g. 0712345678">
+                </div>
+                <button onclick="processCheckOut()" class="btn-exit">Verify Fee & Process M-Pesa STK</button>
+            </div>
+
+        </div>
+
+        <!-- Right Side: Live Map Monitor Grid -->
+        <div class="grid-container">
+            <h2 class="grid-title">📋 Live Parking Space Allocations Map</h2>
+            <div id="parking-grid" class="parking-matrix">
+                <!-- Javascript will inject the styled slot cards here -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Floating System Toast Notifications Alert -->
+    <div id="toast">
+        <div id="toast-indicator" class="toast-dot"></div>
+        <p id="toast-message"></p>
+    </div>
+    <!-- Frontend Core Javascript Logic Client Engine Pipeline -->
+    <script>
+        // Target network socket configurations directing operations to your running Java controller backend engine
+        const API_BASE_URL = "http://localhost:8080/api/parking";
+
+        /**
+         * Pulls dynamic array objects data streams via AJAX loops and redraws the physical allocation grid nodes.
+         */
+        async function refreshDashboard() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/slots`);
+                if (!response.ok) throw new Error("Server communication endpoint lookup pipeline failure status detected.");
+                const slots = await response.json();
+                
+                const gridContainer = document.getElementById("parking-grid");
+                gridContainer.innerHTML = ""; // Wipe past visual tracking layout frames cache nodes properties
+                
+                let vacantCounter = 0;
+
+                // Loop through slots layout tracking maps collection to inject updated cards wrappers
+                slots.forEach(slot => {
+                    const block = document.createElement("div");
+                    
+                    // Apply our clean offline CSS custom classes dynamically based on slot availability status
+                    if (slot.status === 'VACANT') {
+                        block.className = "slot-card slot-vacant";
+                        vacantCounter++;
+                    } else {
+                        block.className = "slot-card slot-occupied";
+                    }
+                    
+                    block.innerHTML = `
+                        <div class="slot-number">${slot.slotNumber}</div>
+                        <div class="slot-status">${slot.status}</div>
+                    `;
+                    
+                    gridContainer.appendChild(block);
+                });
+
+                // Commit live arithmetic counters changes down to dashboard tracker headers panels
+                document.getElementById("available-counter").innerText = vacantCounter;
+            } catch (error) {
+                console.error("Dashboard connection sync error:", error);
+                showToast("Cannot synchronize with core execution layer engine server.", "error");
+            }
+        }
+
+        /**
+         * Packages registration properties parameters tracking markers straight to active checkin endpoint logs.
+         */
+        async function processCheckIn() {
+            const plateInput = document.getElementById("entry-plate");
+            const cleanPlate = plateInput.value.trim().toUpperCase();
+            if (!cleanPlate) return showToast("Please input a valid vehicle plate.", "error");
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/checkin?plate=${encodeURIComponent(cleanPlate)}`, { method: 'POST' });
+                const message = await res.text();
+                
+                if (message.includes("ERROR") || message.includes("REGRET")) {
+                    showToast(message, "error");
+                } else {
+                    showToast(message, "success");
+                    plateInput.value = "";
+                }
+                refreshDashboard();
+            } catch (err) {
+                showToast("Server connection error during entry log checkout workflow.", "error");
+            }
+        }
+
+        /**
+         * Invokes transaction validations queries metrics maps tracking steps and sets up local M-Pesa push prompts triggers execution paths.
+         */
+        async function processCheckOut() {
+            const plateInput = document.getElementById("exit-plate");
+            const phoneInput = document.getElementById("mpesa-phone");
+            
+            const cleanPlate = plateInput.value.trim().toUpperCase();
+            const cleanPhone = phoneInput.value.trim();
+
+            if (!cleanPlate) return showToast("Please input an active tracking license plate.", "error");
+            if (!cleanPhone) return showToast("M-Pesa validation requires an active Safaricom mobile contact row.", "error");
+
+            showToast(`Initiating Daraja STK Push prompt to device: ${cleanPhone}...`, "success");
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/checkout?plate=${encodeURIComponent(cleanPlate)}`, { method: 'POST' });
+                const message = await res.text();
+                
+                if (message.includes("ERROR") || message.includes("failed")) {
+                    showToast(message, "error");
+                } else {
+                    showToast(message, "success");
+                    plateInput.value = "";
+                    phoneInput.value = "";
+                }
+                refreshDashboard();
+            } catch (err) {
+                showToast("Server connection failure during payment check logs handling sets execution.", "error");
+            }
+        }
+
+        /**
+         * UI Presentation helper wrapper designed to toggle functional system notifications banner popups alerts messages.
+         */
+        function showToast(text, type) {
+            const toast = document.getElementById("toast");
+            const messageEl = document.getElementById("toast-message");
+            const indicatorEl = document.getElementById("toast-indicator");
+            
+            messageEl.innerText = text;
+            
+            if (type === 'error') {
+                indicatorEl.className = 'toast-dot dot-error';
+            } else {
+                indicatorEl.className = 'toast-dot dot-success';
+            }
+            
+            // Toggle the visibility class matching our custom CSS styles configurations framework
+            toast.className = "show";
+            
+            setTimeout(() => {
+                toast.className = "";
+            }, 6500);
+        }
+
+        // Trigger dynamic configuration monitor data handshake on application workspace mount event cycles paths
+        window.onload = refreshDashboard;
+    </script>
+</body>
+</html>
