@@ -2,57 +2,37 @@ package com.mmu.parking;
 
 import java.time.LocalDateTime;
 
-/**
- * ARCHITECTURAL LAYER: Entity Data Model
- * PURPOSE: Represents active vehicular nodes stored within the system's memory runtime cache.
- * It locks in immutable arrival stamps to secure tracking data arrays against back-dated 
- * or falsified checkout time requests.
- */
+// Class that represents a vehicle parked inside the system
 public class Vehicle {
     private String licensePlate;
     private String slotAssigned;
     private LocalDateTime entryTime;
     
-    /**
-     * Constructor launched during the entry processing handshake pipeline.
-     * Snaps system clock metrics to preserve chronological integrity.
-     * 
-     * @param licensePlate Unique registration character marker string.
-     * @param slotAssigned Designated terminal zone coordinates code.
-     */
+    // Constructor used when a new car checks into the parking lot
     public Vehicle(String licensePlate, String slotAssigned) {
         this.licensePlate = licensePlate;
         this.slotAssigned = slotAssigned;
-        this.entryTime = LocalDateTime.now(); // Snapshots transaction timestamp records immediately
+        this.entryTime = LocalDateTime.now(); // Saves the current date and time as the entry mark
     }
 
-    /**
-     * Overloaded constructor triggered during system rehydration phases.
-     * Restores historical chronological markers precisely out of persistent SQL row records.
-     */
+    // Overloaded constructor used to restore active cars from the database on system reboot
     public Vehicle(String licensePlate, String slotAssigned, LocalDateTime entryTime) {
         this.licensePlate = licensePlate;
         this.slotAssigned = slotAssigned;
-        this.entryTime = entryTime; // Restores the exact original database clock marker
+        this.entryTime = entryTime; // Restores the original entry time saved in the database
     }
 
-    /**
-     * Extracts the unique license identifier value.
-     */
+    // Getter to retrieve the car's plate number
     public String getlicensePlate() {
         return licensePlate;
     }
 
-    /**
-     * Pulls the absolute epoch date-time marker denoting facility entrance.
-     */
+    // Getter to retrieve the exact timestamp when the vehicle entered
     public LocalDateTime getentryTime() {
         return entryTime;
     }
 
-    /**
-     * Identifies the current grid allocation zone string mapping.
-     */
+    // Getter to check which slot number was assigned to this vehicle
     public String getslotAssigned() {
         return slotAssigned;
     }

@@ -8,34 +8,27 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 
-/**
- * ARCHITECTURAL LAYER: Controller / Web Routing Layer
- * PURPOSE: Initializes an embedded network socket server pipeline. It captures cross-origin (CORS) 
- * browser requests, dispatches parameters to our internal ParkingManagement engine, and pushes back responses.
- */
+// Set up the web routing endpoints so the frontend dashboard can talk to the Java logic
 public class ParkingController {
 
-    // Initializing our core backend engine instance with a default allocation of 100 parking bays
+    // Create the parking management engine instance with a layout of 100 slots
     private static final ParkingManagement parkingSystem = new ParkingManagement(100);
 
-    /**
-     * Spins up the embedded HTTP web listener engine on a specified port.
-     * Maps explicit routing path layouts to support asynchronous operations from the HTML frontend dashboard.
-     */
+    // Boot up the embedded Java HTTP server listener on port 8080
     public static void startServer() throws IOException {
-        // Bind to all local network loopback interfaces using default port 8080
+        // Open port 8080 to listen for incoming connections
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
         
-        // Unified catch-all context routing path to process API web streams efficiently
+        // Define the main context path route for our web service calls
         server.createContext("/api/parking/", new HttpHandler() {
             @Override
             public void handle(HttpExchange exchange) throws IOException {
-                // APPLIES EXPLICIT CORS BYPASS: Prevents modern web browsers from blocking local inter-port communications
+                // Set CORS headers so the web page browser doesn't block data access
                 exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
                 exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
                 exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-                // Instantly intercept and validate browser preflight check negotiations before handling payloads
+                // Handle HTTP OPTIONS preflight checks sent by the browser
                 if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
                     exchange.sendResponseHeaders(204, -1);
                     return;
@@ -47,24 +40,24 @@ public class ParkingController {
                 String response = "";
 
                 try {
-                    // ROUTE 1: Intake operations mapping endpoint
+                    // Check-in Route: Handles incoming vehicle registration plates
                     if (path.endsWith("/checkin") && "POST".equalsIgnoreCase(method)) {
                         String plate = getQueryParam(query, "plate");
                         response = parkingSystem.checkIn(plate);
                         sendResponse(exchange, response, 200);
                     } 
-                    // ROUTE 2: Outtake operations mapping endpoint
+                    // Check-out Route: Calculates total fees and checks M-Pesa status
                     else if (path.endsWith("/checkout") && "POST".equalsIgnoreCase(method)) {
                         String plate = getQueryParam(query, "plate");
                         response = parkingSystem.checkOut(plate);
                         sendResponse(exchange, response, 200);
                     } 
-                    // ROUTE 3: Live real-time visualization tracker grid data model stream endpoint
+                    // Slots Route: Serializes the active grid arrays tracking states into JSON data
                     else if (path.endsWith("/slots") && "GET".equalsIgnoreCase(method)) {
                         ArrayList<Slot> slots = parkingSystem.getLayout();
                         StringBuilder json = new StringBuilder("[");
                         
-                        // Parse Java model properties objects sequentially to generate a structured JSON data string array
+                        // Loop through our slot objects to build a clean JSON format text string
                         for (int i = 0; i < slots.size(); i++) {
                             Slot s = slots.get(i);
                             json.append(String.format("{\"slotNumber\":\"%s\",\"status\":\"%s\"}", s.getSlotNumber(), s.getStatus()));
@@ -72,11 +65,11 @@ public class ParkingController {
                         }
                         json.append("]");
                         
-                        // Inform browser endpoints that they are downloading standard application/json strings packets
+                        // Set standard json content properties response header headers
                         exchange.getResponseHeaders().add("Content-Type", "application/json");
                         sendResponse(exchange, json.toString(), 200);
                     } 
-                    // ROUTE 4: Fallback handle block
+                    // Catch unknown endpoints
                     else {
                         sendResponse(exchange, "Resource Path Not Found", 404);
                     }
@@ -88,15 +81,13 @@ public class ParkingController {
             }
         });
 
-        // Use standard thread execution managers allocations schedules sets
+        // Set default system thread pool parameters configurations
         server.setExecutor(null);
         server.start();
         System.out.println("🚀 Jipange Parking Core Native Engine listening actively on http://localhost:8080");
     }
 
-    /**
-     * Helper method to output byte streams back across active TCP server connections pathways.
-     */
+    // Helper method to write response character data streams back to the browser network connection
     private static void sendResponse(HttpExchange exchange, String response, int statusCode) throws IOException {
         byte[] bytes = response.getBytes("UTF-8");
         exchange.sendResponseHeaders(statusCode, bytes.length);
@@ -105,9 +96,7 @@ public class ParkingController {
         os.close();
     }
 
-    /**
-     * Extracts exact target string parameters keys from standard HTTP URI query string blocks maps.
-     */
+    // Utility method to parse target parameters from the address query key fields
     private static String getQueryParam(String query, String key) {
         if (query == null) return "";
         for (String param : query.split("&")) {

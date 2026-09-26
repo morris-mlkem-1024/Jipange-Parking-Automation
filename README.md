@@ -5,12 +5,12 @@
 
 ---
 
-## 1. COMPREHENSIVE ARCHITECTURAL MODULE ANALYSES & ALGORITHMS
+## 1. SYSTEM MODULE ANALYSIS & ALGORITHMS
 
-The Jipange Parking Automation system is deconstructed into four high-cohesion structural application modules to fulfill the client's automated terms of reference.
+The Jipange Parking Automation system is broken down into four core modules to handle all the automated project requirements.
 
 ### Module 1: Live Space Allocation & Visual Display Monitor
-*   **Functional Purpose:** Continuously scans the physical parking infrastructure status to compute total remaining space and map out real-time slot vacancies onto the driver-facing visual dashboard before entry.
+*   **Functional Purpose:** Scans the parking space array list to calculate remaining spaces and updates the real-time visual grid layout on the frontend dashboard before a driver enters.
 *   **Algorithm (Formal Pseudocode):**
 ```text
 BEGIN MODULE_VisualDisplay Monitor
@@ -36,7 +36,7 @@ END MODULE_VisualDisplay
 ```
 
 ### Module 2: Vehicle Intake & Ingestion Logging Engine
-*   **Functional Purpose:** Intercepts incoming registration markers (license plates) at the physical terminal barrier, registers a high-precision entry timestamp milestone, assigns a clean vacant slot, and synchronizes the state across relational storage sheets.
+*   **Functional Purpose:** Intercepts incoming license plates at the entry barrier, saves a high-precision entry timestamp, assigns an available parking slot, and syncs the records to the database.
 *   **Algorithm (Formal Pseudocode):**
 ```text
 BEGIN MODULE_VehicleCheckIn(license_plate)
@@ -74,7 +74,7 @@ END MODULE_VehicleCheckIn
 ```
 
 ### Module 3: Exit Processing & Tiered Tariff Calculator
-*   **Functional Purpose:** Instantiates checkout sequences on vehicle arrival at the exit gate, evaluates total elapsed delta duration in uniform time increments, and processes calculation checks against the client’s precise pricing matrices.
+*   **Functional Purpose:** Launches checkout calculations when a vehicle arrives at the exit gate, computes the total minutes spent inside, and matches it against the project's pricing metrics.
 *   **Algorithm (Formal Pseudocode):**
 ```text
 BEGIN MODULE_TariffCalculator(license_plate)
@@ -106,7 +106,7 @@ END MODULE_TariffCalculator
 ```
 
 ### Module 4: Integrated M-Pesa Payment Handshake & Barrier Control
-*   **Functional Purpose:** Coordinates with Safaricom’s Daraja API processing infrastructure to guarantee payment tracking checks before clearing active memory models and dropping physical barrier locks.
+*   **Functional Purpose:** Simulates a connection with Safaricom’s Daraja API to verify that the parking payment goes through before clearing the car from memory cache tracking tables and opening the exit gate.
 *   **Algorithm (Formal Pseudocode):**
 ```text
 BEGIN MODULE_PaymentBarrierControl(license_plate, customer_phone)
@@ -145,37 +145,37 @@ END MODULE_PaymentBarrierControl
 
 ---
 
-## 2. ADVANCED DATA STRUCTURE ANALYSIS & SELECTION RATIONALE
+## 2. DATA STRUCTURE ANALYSIS & SELECTION RATIONALE
 
-To optimize system execution loops inside production environments, specific Java data collections were implemented based on rigorous time-complexity performance indicators.
+To make sure the system executes quickly and efficiently, specific Java collections were selected based on their algorithmic time complexity and performance traits.
 
-### A. Dynamic Array Linear Lists (`java.util.ArrayList<Slot>`)
-*   **Implementation Use:** Used to represent the static sequential physical index map of the 100 allocation zones.
-*   **Theoretical Rationale:** The system configuration requires structured iteration patterns when encoding the entire parking structure map layout schema parameters down to HTML client blocks. An `ArrayList` preserves allocation order perfectly and allows smooth sequential loops across continuous internal hardware memory tracks.
+### A. Dynamic Array Lists (`java.util.ArrayList<Slot>`)
+*   **Use in System:** Used to hold the sequential list of all 100 physical parking spaces.
+*   **Rationale:** The application needs to iterate through all 100 slots in order when rendering the grid cells on the user interface dashboard. An `ArrayList` preserves the index insertion order perfectly and provides fast sequential access across adjacent memory locations.
 
-### B. Chained Hash Code Lookup Matrices (`java.util.HashMap<String, Vehicle>`)
-*   **Implementation Use:** Tracks live vehicles inside the facility using the unique alphanumeric registration plate string as the index entry key.
-*   **Theoretical Rationale:** High-volume entry barriers cannot tolerate slow linear search loops (\(O(n)\) time) when scanning hundreds of elements to calculate checkout logs. By utilizing a hash indexing map layout, processing execution lookups drop down to a highly optimized **\(O(1)\) constant runtime complexity matrix**, performing instant value fetches regardless of facility size.
+### B. Hash Maps (`java.util.HashMap<String, Vehicle>`)
+*   **Use in System:** Tracks cars currently parked inside the facility using their unique vehicle license plate string as the lookup key.
+*   **Rationale:** A busy entry or exit barrier cannot afford slow linear searches (\(O(n)\) time) when checking if a vehicle is registered or calculating its exit fee. By using a hash index map, lookup times drop to a constant **\(O(1)\) runtime complexity**, allowing instant retrieval regardless of how many cars are inside.
 
 ---
 
-## 3. DYNAMIC RELATIONAL STORAGE DATABASE BLUEPRINT
+## 3. RELATIONAL DATABASE SETUP SCHEMA
 
-Configured explicitly for modern relational query engines running under Windows deployment profiles (XAMPP / MySQL Community Server).
+This script is structured for relational database managers (such as XAMPP / MySQL Server) to initialize the backend tables.
 
 ```sql
--- Architectural Target: MySQL Storage Engine Initialization Script
+-- Database Initialization Script
 CREATE DATABASE IF NOT EXISTS parking_sys;
 USE parking_sys;
 
--- Table Structure 1: Tracks current system hardware component configuration records
+-- Table Structure 1: Stores info about the parking slot statuses
 CREATE TABLE IF NOT EXISTS parking_slots (
     id INT AUTO_INCREMENT PRIMARY KEY,
     slot_number VARCHAR(10) NOT NULL UNIQUE,
     status VARCHAR(20) DEFAULT 'VACANT'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Table Structure 2: Relational transactional log file records for fiscal audit parsing
+-- Table Structure 2: Stores transactional log details for vehicles checking in and out
 CREATE TABLE IF NOT EXISTS vehicle_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     slot_id INT,
