@@ -13,7 +13,7 @@ public class Database {
     // Combine the strings together to make the full database path link
     private static final String URL = PART1 + PART2;
     private static final String USER = "avnadmin"; 
-    private static final String PASSWORD = "AVNS_s5yTsBQR2cUl2kcc5lB"; 
+    private static final String PASSWORD = "AVNS_UdorteRvUyM--2UGKG1"; 
     
     // Method to create and return the active database connection string
     public static Connection getConnection() {
